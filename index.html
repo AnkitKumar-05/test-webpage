@@ -4,18 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Valentine?</title>
+
+    <!-- Romantic font (optional, but very pretty) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="./styles.css" />
   </head>
 
   <body>
-    <!-- Confetti canvas sits on top of everything (clicks pass through) -->
+    <!-- Confetti overlay -->
     <canvas id="confettiCanvas" aria-hidden="true"></canvas>
 
     <main class="app">
-      <h1 class="question">Will you be my Valentine? 💘</h1>
-      <p class="hint">(Choose wisely 😄)</p>
+      <h1 class="question" id="questionText">Will you be my Valentine? 💘</h1>
+      <p class="hint" id="hintText">(Choose wisely 😄)</p>
+
+      <div class="meter" aria-hidden="true">
+        <div class="meter__label">Resistance</div>
+        <div class="meter__bar">
+          <div class="meter__fill" id="meterFill" style="width: 0%"></div>
+        </div>
+      </div>
 
       <div class="play-area" id="playArea">
+        <!-- Heart trail stays inside this layer -->
+        <div class="trail-layer" id="trailLayer" aria-hidden="true"></div>
+
         <button class="btn yes" id="yesBtn" type="button">Yes</button>
         <button class="btn no" id="noBtn" type="button">No</button>
       </div>

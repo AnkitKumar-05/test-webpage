@@ -1,6 +1,13 @@
+:root {
+  --card: rgba(255, 255, 255, 0.78);
+  --stroke: rgba(255, 255, 255, 0.45);
+  --shadow: rgba(0, 0, 0, 0.12);
+  --text: rgba(20, 20, 20, 0.92);
+  --muted: rgba(20, 20, 20, 0.65);
+}
+
 * {
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 body {
@@ -8,46 +15,111 @@ body {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: radial-gradient(circle at top, #ffe2ea, #fff);
-  padding: 16px;
+  padding: 18px;
   overflow: hidden;
+  color: var(--text);
+
+  /* Romantic animated gradient */
+  background: radial-gradient(circle at 20% 10%, #ffe3ee 0%, transparent 45%),
+    radial-gradient(circle at 80% 30%, #e9f2ff 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, #fff2d8 0%, transparent 50%),
+    linear-gradient(120deg, #fff 0%, #fff 100%);
+  animation: bgShift 10s ease-in-out infinite alternate;
 }
 
+@keyframes bgShift {
+  from {
+    filter: saturate(1) brightness(1);
+    transform: translateZ(0);
+  }
+  to {
+    filter: saturate(1.05) brightness(1.02);
+    transform: translateZ(0);
+  }
+}
+
+/* Card */
 .app {
-  width: min(720px, 100%);
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 20px;
+  width: min(760px, 100%);
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 22px;
   padding: 28px 20px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 18px 60px var(--shadow);
   text-align: center;
   position: relative;
   z-index: 2;
 }
 
+/* Typography: romantic headline + clean body */
 .question {
   margin: 0 0 8px;
-  font-size: clamp(26px, 4vw, 40px);
+  font-family: "Fraunces", serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: clamp(28px, 4vw, 44px);
 }
 
 .hint {
-  margin: 0 0 18px;
-  opacity: 0.75;
+  margin: 0 0 14px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    sans-serif;
+  color: var(--muted);
 }
 
+/* Cute little meter */
+.meter {
+  display: grid;
+  gap: 8px;
+  margin: 0 auto 16px;
+  width: min(420px, 92%);
+}
+.meter__label {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.meter__bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+.meter__fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff4d6d, #ffb703, #06d6a0);
+  transition: width 220ms ease;
+}
+
+/* Play area */
 .play-area {
   position: relative;
-  height: 320px;
-  border-radius: 16px;
+  height: clamp(280px, 42vh, 360px);
+  border-radius: 18px;
   border: 2px dashed rgba(0, 0, 0, 0.12);
   background: linear-gradient(
     180deg,
-    rgba(255, 245, 250, 0.9),
-    rgba(255, 255, 255, 0.6)
+    rgba(255, 255, 255, 0.65),
+    rgba(255, 255, 255, 0.35)
   );
   overflow: hidden;
   margin: 0 auto;
 }
 
+/* Layer for heart trail */
+.trail-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Buttons */
 .btn {
   position: absolute;
   padding: 12px 18px;
@@ -57,9 +129,15 @@ body {
   cursor: pointer;
   user-select: none;
   touch-action: manipulation;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
   transform-origin: center;
-  transition: transform 140ms ease, filter 140ms ease;
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 200ms ease;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.btn:hover {
+  filter: brightness(1.03);
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.18);
 }
 
 .btn:active {
@@ -69,21 +147,23 @@ body {
 .btn.yes {
   left: 32%;
   top: 55%;
-  background: #22c55e;
+  background: linear-gradient(180deg, #2ee67a, #22c55e);
   color: white;
 }
 
 .btn.no {
   left: 58%;
   top: 55%;
-  background: #ef4444;
+  background: linear-gradient(180deg, #ff5a76, #ef4444);
   color: white;
 }
 
+/* Result */
 .result {
   margin-top: 18px;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: "Fraunces", serif;
 }
 
 /* Confetti canvas overlay */
@@ -92,6 +172,51 @@ body {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  pointer-events: none; /* allow clicking buttons through it */
+  pointer-events: none;
   z-index: 10;
+}
+
+/* Floating hearts background */
+.heart {
+  position: fixed;
+  bottom: -20px;
+  opacity: 0.8;
+  animation: floatUp linear forwards;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(0.2px);
+}
+
+@keyframes floatUp {
+  from {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0.85;
+  }
+  to {
+    transform: translateY(-110vh) translateX(var(--drift)) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Heart trail particles */
+.trail-heart {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  animation: popFade 650ms ease forwards;
+  opacity: 0.95;
+}
+
+@keyframes popFade {
+  0% {
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0.9;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+  }
 }
