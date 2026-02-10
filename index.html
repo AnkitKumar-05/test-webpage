@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Valentine?</title>
 
-    <!-- Romantic font (optional, but very pretty) -->
+    <!-- Romantic font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,8 +20,10 @@
     <!-- Confetti overlay -->
     <canvas id="confettiCanvas" aria-hidden="true"></canvas>
 
-    <main class="app">
-      <h1 class="question" id="questionText">Will you be my Valentine? 💘</h1>
+    <main class="app" id="app">
+      <h1 class="question" id="questionText" aria-label="Will you be my Valentine?">
+        <!-- Typewriter text goes here -->
+      </h1>
       <p class="hint" id="hintText">(Choose wisely 😄)</p>
 
       <div class="meter" aria-hidden="true">
@@ -32,7 +34,6 @@
       </div>
 
       <div class="play-area" id="playArea">
-        <!-- Heart trail stays inside this layer -->
         <div class="trail-layer" id="trailLayer" aria-hidden="true"></div>
 
         <button class="btn yes" id="yesBtn" type="button">Yes</button>
@@ -41,6 +42,70 @@
 
       <div class="result" id="result" aria-live="polite"></div>
     </main>
+
+    <!-- Success / Plan date modal -->
+    <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
+
+    <div
+      class="modal"
+      id="successModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      aria-describedby="modalDesc"
+      aria-hidden="true"
+    >
+      <button class="modal__close" id="modalCloseBtn" type="button" aria-label="Close">
+        ✕
+      </button>
+
+      <h2 class="modal__title" id="modalTitle">Yay!! 💖</h2>
+      <p class="modal__desc" id="modalDesc">
+        Let’s plan our date 💌 Pick a day & time, then add it to Google Calendar (or download the invite).
+      </p>
+
+      <div class="form-grid">
+        <label class="field">
+          <span>Date</span>
+          <input id="dateInput" type="date" />
+        </label>
+
+        <label class="field">
+          <span>Start time</span>
+          <input id="startTimeInput" type="time" value="19:00" />
+        </label>
+
+        <label class="field">
+          <span>Duration (minutes)</span>
+          <input id="durationInput" type="number" min="15" step="15" value="120" />
+        </label>
+
+        <label class="field field--full">
+          <span>Title</span>
+          <input id="titleInput" type="text" value="Valentine’s Date 💘" />
+        </label>
+
+        <label class="field field--full">
+          <span>Location (optional)</span>
+          <input id="locationInput" type="text" placeholder="e.g., Marina Bay Sands / Cozy café" />
+        </label>
+
+        <label class="field field--full">
+          <span>Notes (optional)</span>
+          <textarea id="notesInput" rows="3" placeholder="e.g., Dinner + dessert 🍰"></textarea>
+        </label>
+      </div>
+
+      <div class="modal__actions">
+        <button class="btn2 primary" id="addToGoogleBtn" type="button">Add to Google Calendar</button>
+        <button class="btn2" id="downloadIcsBtn" type="button">Download invite (.ics)</button>
+        <button class="btn2 ghost" id="copyDetailsBtn" type="button">Copy details</button>
+      </div>
+
+      <p class="modal__footnote">
+        Tip: If you download the <b>.ics</b>, open Google Calendar → Settings → <b>Import & export</b> → Import.
+      </p>
+    </div>
 
     <script src="./script.js"></script>
   </body>
