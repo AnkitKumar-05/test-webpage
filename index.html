@@ -21,9 +21,11 @@
     <canvas id="confettiCanvas" aria-hidden="true"></canvas>
 
     <main class="app" id="app">
+      <!-- Fallback text is visible even if JS fails -->
       <h1 class="question" id="questionText" aria-label="Will you be my Valentine?">
-        <!-- Typewriter text goes here -->
+        Will you be my Valentine? 💘
       </h1>
+
       <p class="hint" id="hintText">(Choose wisely 😄)</p>
 
       <div class="meter" aria-hidden="true">
@@ -43,12 +45,13 @@
       <div class="result" id="result" aria-live="polite"></div>
     </main>
 
-    <!-- Success / Plan date modal -->
-    <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
+    <!-- Success / Plan date modal (HIDDEN by default) -->
+    <div class="modal-backdrop" id="modalBackdrop" hidden aria-hidden="true"></div>
 
     <div
       class="modal"
       id="successModal"
+      hidden
       role="dialog"
       aria-modal="true"
       aria-labelledby="modalTitle"

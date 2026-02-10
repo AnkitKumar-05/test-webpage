@@ -6,6 +6,11 @@
   --muted: rgba(20, 20, 20, 0.65);
 }
 
+/* Hard-hide if hidden attribute exists */
+[hidden] {
+  display: none !important;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -380,7 +385,7 @@ body {
 }
 
 .btn2.ghost {
-  background: rgba(255, 90, 118, 0.10);
+  background: rgba(255, 90, 118, 0.1);
 }
 
 .modal__footnote {

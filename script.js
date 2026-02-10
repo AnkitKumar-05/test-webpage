@@ -25,24 +25,32 @@ const titleInput = document.getElementById("titleInput");
 const locationInput = document.getElementById("locationInput");
 const notesInput = document.getElementById("notesInput");
 
-// ========= 1) Typewriter question =========
+// ========= 1) Typewriter question (safe) =========
 function typewriter(text, speedMs = 38) {
-  questionEl.innerHTML = ""; // clear
-  const span = document.createElement("span");
-  const caret = document.createElement("span");
-  caret.className = "type-caret";
-  questionEl.appendChild(span);
-  questionEl.appendChild(caret);
+  // Keep fallback text visible immediately
+  questionEl.textContent = text;
 
-  let i = 0;
-  const timer = setInterval(() => {
-    span.textContent = text.slice(0, i + 1);
-    i++;
-    if (i >= text.length) {
-      clearInterval(timer);
-      setTimeout(() => caret.remove(), 600);
-    }
-  }, speedMs);
+  try {
+    // Enhance with typing animation
+    questionEl.innerHTML = "";
+    const span = document.createElement("span");
+    const caret = document.createElement("span");
+    caret.className = "type-caret";
+    questionEl.appendChild(span);
+    questionEl.appendChild(caret);
+
+    let i = 0;
+    const timer = setInterval(() => {
+      span.textContent = text.slice(0, i + 1);
+      i++;
+      if (i >= text.length) {
+        clearInterval(timer);
+        setTimeout(() => caret.remove(), 600);
+      }
+    }, speedMs);
+  } catch {
+    questionEl.textContent = text;
+  }
 }
 
 // ========= 2) Floating hearts background =========
@@ -85,27 +93,29 @@ function spawnSparkle(x, y) {
   setTimeout(() => s.remove(), 750);
 }
 
-function handlePointerMove(e) {
+function handlePointerMove(clientX, clientY) {
   const now = performance.now();
-  if (now - lastSparkleAt < 28) return; // throttle
+  if (now - lastSparkleAt < 28) return;
   lastSparkleAt = now;
-
-  // Use clientX/Y for mouse, touches, etc.
-  const x = e.clientX ?? (e.touches && e.touches[0]?.clientX);
-  const y = e.clientY ?? (e.touches && e.touches[0]?.clientY);
-  if (typeof x !== "number" || typeof y !== "number") return;
-
-  spawnSparkle(x, y);
+  spawnSparkle(clientX, clientY);
 }
 
-window.addEventListener("mousemove", handlePointerMove, { passive: true });
 window.addEventListener(
-  "touchmove",
-  (e) => handlePointerMove(e.touches ? { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } : e),
+  "mousemove",
+  (e) => handlePointerMove(e.clientX, e.clientY),
   { passive: true }
 );
 
-// ========= Button behavior (No dodges, Yes grows) =========
+window.addEventListener(
+  "touchmove",
+  (e) => {
+    if (!e.touches || !e.touches[0]) return;
+    handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+  },
+  { passive: true }
+);
+
+// ========= Button behavior =========
 let yesScale = 1;
 const YES_GROWTH_PER_DODGE = 0.08;
 const YES_MAX_SCALE = 2.2;
@@ -157,7 +167,6 @@ function isTooCloseToYes(x, y) {
   return dist < 95;
 }
 
-// Heart trail at current No position
 function spawnTrailHeartAtCurrentNo() {
   const areaRect = playArea.getBoundingClientRect();
   const noRect = noBtn.getBoundingClientRect();
@@ -283,6 +292,7 @@ function launchConfetti(durationMs = 2600) {
       } else {
         drawHeart(p.size);
       }
+
       ctx.restore();
     }
 
@@ -297,14 +307,16 @@ function launchConfetti(durationMs = 2600) {
   requestAnimationFrame(frame);
 }
 
-// ========= Modal open/close =========
+// ========= Modal open/close (with hidden attribute) =========
 function openModal() {
+  modal.hidden = false;
+  modalBackdrop.hidden = false;
+
   modal.classList.add("is-open");
   modalBackdrop.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");
   modalBackdrop.setAttribute("aria-hidden", "false");
 
-  // Focus first field for accessibility
   setTimeout(() => dateInput.focus(), 50);
 }
 
@@ -313,6 +325,11 @@ function closeModal() {
   modalBackdrop.classList.remove("is-open");
   modal.setAttribute("aria-hidden", "true");
   modalBackdrop.setAttribute("aria-hidden", "true");
+
+  setTimeout(() => {
+    modal.hidden = true;
+    modalBackdrop.hidden = true;
+  }, 200);
 }
 
 modalCloseBtn.addEventListener("click", closeModal);
@@ -322,7 +339,6 @@ window.addEventListener("keydown", (e) => {
 });
 
 // ========= Calendar helpers =========
-// Convert local date+time to UTC date-time string for Google (YYYYMMDDTHHMMSSZ)
 function toGoogleUtcString(localDateObj) {
   const pad = (n) => String(n).padStart(2, "0");
   return (
@@ -337,7 +353,6 @@ function toGoogleUtcString(localDateObj) {
   );
 }
 
-// Build Google Calendar "create event" URL
 function buildGoogleCalendarUrl({ title, details, location, startLocal, endLocal }) {
   const startUtc = toGoogleUtcString(startLocal);
   const endUtc = toGoogleUtcString(endLocal);
@@ -353,7 +368,6 @@ function buildGoogleCalendarUrl({ title, details, location, startLocal, endLocal
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-// ICS date format in UTC: YYYYMMDDTHHMMSSZ
 function toIcsUtcString(dateObj) {
   const pad = (n) => String(n).padStart(2, "0");
   return (
@@ -368,7 +382,6 @@ function toIcsUtcString(dateObj) {
   );
 }
 
-// Escape text for ICS (basic)
 function icsEscape(text) {
   return String(text || "")
     .replaceAll("\\", "\\\\")
@@ -415,24 +428,20 @@ function downloadTextFile(filename, content, mime) {
 }
 
 function getEventDataFromForm() {
-  const dateStr = dateInput.value; // YYYY-MM-DD
-  const timeStr = startTimeInput.value || "19:00"; // HH:MM
+  const dateStr = dateInput.value;
+  const timeStr = startTimeInput.value || "19:00";
   const durationMin = Math.max(15, Number(durationInput.value || 120));
-  const title = titleInput.value?.trim() || "Valentine’s Date 💘";
-  const location = locationInput.value?.trim() || "";
-  const notes = notesInput.value?.trim() || "";
+
+  const title = (titleInput.value || "").trim() || "Valentine’s Date 💘";
+  const location = (locationInput.value || "").trim() || "";
+  const notes = (notesInput.value || "").trim() || "";
 
   if (!dateStr) return { error: "Please pick a date 💌" };
 
-  // Local start
   const startLocal = new Date(`${dateStr}T${timeStr}:00`);
   const endLocal = new Date(startLocal.getTime() + durationMin * 60 * 1000);
 
-  const detailsLines = [
-    "Yay! Valentine’s date 💖",
-    notes ? `Notes: ${notes}` : "",
-    "— made with love 🥰",
-  ].filter(Boolean);
+  const detailsLines = ["Yay! Valentine’s date 💖", notes ? `Notes: ${notes}` : "", "— made with love 🥰"].filter(Boolean);
 
   return {
     title,
@@ -440,37 +449,27 @@ function getEventDataFromForm() {
     details: detailsLines.join("\n"),
     startLocal,
     endLocal,
-    dateStr,
   };
 }
 
-// ========= Modal action buttons =========
 addToGoogleBtn.addEventListener("click", () => {
   const data = getEventDataFromForm();
-  if (data.error) {
-    alert(data.error);
-    return;
-  }
+  if (data.error) return alert(data.error);
   const url = buildGoogleCalendarUrl(data);
   window.open(url, "_blank", "noopener,noreferrer");
 });
 
 downloadIcsBtn.addEventListener("click", () => {
   const data = getEventDataFromForm();
-  if (data.error) {
-    alert(data.error);
-    return;
-  }
+  if (data.error) return alert(data.error);
   const ics = buildIcsContent(data);
   downloadTextFile("valentines-date.ics", ics, "text/calendar;charset=utf-8");
 });
 
 copyDetailsBtn.addEventListener("click", async () => {
   const data = getEventDataFromForm();
-  if (data.error) {
-    alert(data.error);
-    return;
-  }
+  if (data.error) return alert(data.error);
+
   const text =
     `${data.title}\n` +
     `When: ${data.startLocal.toLocaleString()} - ${data.endLocal.toLocaleString()}\n` +
@@ -482,11 +481,11 @@ copyDetailsBtn.addEventListener("click", async () => {
     copyDetailsBtn.textContent = "Copied! ✅";
     setTimeout(() => (copyDetailsBtn.textContent = "Copy details"), 1200);
   } catch {
-    alert("Copy failed. You can manually select and copy the details.");
+    alert("Copy failed. You can manually copy the details.");
   }
 });
 
-// ========= Events =========
+// ========= Event bindings =========
 noBtn.addEventListener("mouseenter", dodge);
 noBtn.addEventListener("touchstart", (e) => {
   e.preventDefault();
@@ -494,13 +493,12 @@ noBtn.addEventListener("touchstart", (e) => {
 });
 noBtn.addEventListener("focus", dodge);
 
-// Clicking Yes => confetti + open planning modal
 yesBtn.addEventListener("click", () => {
   result.textContent = "Yay!! 💖";
   launchConfetti(2600);
   startHearts();
 
-  // default date to today if empty
+  // Default date to today if empty
   if (!dateInput.value) {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -514,10 +512,8 @@ yesBtn.addEventListener("click", () => {
 
 // ========= Init =========
 window.addEventListener("load", () => {
-  // Typewriter on load
   typewriter("Will you be my Valentine? 💘", 36);
 
-  // Place buttons
   setButtonPosition(yesBtn, Math.floor(playArea.clientWidth * 0.32), Math.floor(playArea.clientHeight * 0.55));
   setButtonPosition(noBtn, Math.floor(playArea.clientWidth * 0.58), Math.floor(playArea.clientHeight * 0.55));
 
