@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Valentine?</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <!-- Confetti canvas sits on top of everything (clicks pass through) -->
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+    <main class="app">
+      <h1 class="question">Will you be my Valentine? 💘</h1>
+      <p class="hint">(Choose wisely 😄)</p>
+
+      <div class="play-area" id="playArea">
+        <button class="btn yes" id="yesBtn" type="button">Yes</button>
+        <button class="btn no" id="noBtn" type="button">No</button>
+      </div>
+
+      <div class="result" id="result" aria-live="polite"></div>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
